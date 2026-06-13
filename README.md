@@ -4,6 +4,8 @@ An AI-powered analytics system that processes **Amazon product reviews** to extr
 
 The system analyzes customer feedback using both **VADER sentiment analysis (rule-based NLP)** and a **Machine Learning model (TF-IDF + Logistic Regression)**, and presents insights through an interactive **Streamlit dashboard**.
 
+👉 **Live Demo:** https://e-comproreviewai.streamlit.app/
+
 ---
 
 ## 🚀 Key Features

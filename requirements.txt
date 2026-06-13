@@ -1,8 +1,8 @@
+streamlit
 pandas
 numpy
 nltk
-scikit-learn
-streamlit
-matplotlib
+plotly
 wordcloud
+scikit-learn
 joblib

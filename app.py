@@ -5,6 +5,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import joblib
 
 from analytics import (
     load_data,
@@ -16,6 +17,18 @@ from analytics import (
     top_categories,
     recommendation_score,
     generate_insights
+)
+
+# ==========================================
+# LOAD ML MODEL
+# ==========================================
+
+ml_model = joblib.load(
+    "models/sentiment_model.pkl"
+)
+
+vectorizer = joblib.load(
+    "models/tfidf_vectorizer.pkl"
 )
 
 # ==========================================
@@ -53,7 +66,7 @@ df = get_data()
 # SIDEBAR
 # ==========================================
 
-st.sidebar.title("🧭 Navigation")
+st.sidebar.title("☰ Navigation")
 
 page = st.sidebar.radio(
     "Select Page",
@@ -376,13 +389,22 @@ elif page == "Review Prediction":
         "🔍 Real-Time Sentiment Prediction"
     )
 
-    st.write(
-        "Enter a customer review below."
+    st.markdown(
+        """
+Analyze customer reviews using:
+
+ 1️⃣ VADER Sentiment Analysis (Rule-Based)
+
+ 2️⃣ Machine Learning Model (Logistic Regression)
+
+Compare both predictions side-by-side.
+        """
     )
 
     review = st.text_area(
-        "Review",
-        height=150
+        "Enter Customer Review",
+        height=180,
+        placeholder="Example: Battery drains quickly and device overheats."
     )
 
     if st.button(
@@ -391,67 +413,185 @@ elif page == "Review Prediction":
 
         if review.strip():
 
-            prediction = (
+            # ==================================
+            # VADER PREDICTION
+            # ==================================
+
+            vader_prediction = (
                 get_sentiment(review)
             )
 
-            if prediction == "Positive":
+            # ==================================
+            # ML PREDICTION
+            # ==================================
 
-                st.success(
-                    f"😊 Sentiment: {prediction}"
+            review_vector = (
+                vectorizer.transform(
+                    [review]
+                )
+            )
+
+            ml_prediction = (
+                ml_model.predict(
+                    review_vector
+                )[0]
+            )
+
+            st.divider()
+
+            col1, col2 = st.columns(2)
+
+            # ==================================
+            # VADER RESULT
+            # ==================================
+
+            with col1:
+
+                st.subheader(
+                    " VADER Prediction"
                 )
 
-            elif prediction == "Negative":
+                if vader_prediction == "Positive":
 
-                st.error(
-                    f"😡 Sentiment: {prediction}"
+                    st.success(
+                        f" {vader_prediction}"
+                    )
+
+                elif vader_prediction == "Negative":
+
+                    st.error(
+                        f"😡 {vader_prediction}"
+                    )
+
+                else:
+
+                    st.warning(
+                        f"😐 {vader_prediction}"
+                    )
+
+            # ==================================
+            # ML RESULT
+            # ==================================
+
+            with col2:
+
+                st.subheader(
+                    "ML Prediction"
+                )
+
+                if ml_prediction == "Positive":
+
+                    st.success(
+                        f"😊 {ml_prediction}"
+                    )
+
+                elif ml_prediction == "Negative":
+
+                    st.error(
+                        f"😡 {ml_prediction}"
+                    )
+
+                else:
+
+                    st.warning(
+                        f"😐 {ml_prediction}"
+                    )
+
+            st.divider()
+
+            if vader_prediction == ml_prediction:
+
+                st.success(
+                    f"✅ Both models agree: {vader_prediction}"
                 )
 
             else:
 
-                st.warning(
-                    f"😐 Sentiment: {prediction}"
+                st.info(
+                    f"⚠️ Models disagree. VADER = {vader_prediction}, ML = {ml_prediction}"
                 )
 
+            st.subheader(
+                "📝 Review Text"
+            )
+
+            st.write(review)
 # ==========================================
 # ABOUT PAGE
 # ==========================================
 
 else:
 
-    st.title(
-        "ℹ️ About Project"
-    )
+    st.title("ℹ️ About Project")
 
     st.markdown(
         """
-## E-Commerce Product Review Intelligence System
+# 🛒 E-Commerce Product Review Intelligence System
 
-### Technologies Used
+An AI-powered analytics solution that processes **Amazon product reviews** to extract
+actionable business insights using **Natural Language Processing (NLP), Sentiment Analysis, and Data Visualization**.
 
-- Python
-- Pandas
-- NLP
-- NLTK
-- VADER Sentiment Analysis
-- Plotly
-- Streamlit
+---
 
-### Features
+## 📊 Dataset Overview
 
-- Real-Time Sentiment Prediction
-- Customer Complaint Analysis
-- Top Praised Features
-- Product Analytics
-- Category Analytics
-- Review Search
-- Recommendation Score
-- Business Insights Dashboard
+This project is built on a real-world **Amazon Product Reviews dataset** containing:
 
-### Business Value
+- Product names and categories  
+- Customer ratings and review text  
+- Review timestamps and metadata  
+- Recommendation and user feedback signals  
 
-Helps organizations analyze customer feedback,
-identify recurring issues,
-and improve products using data-driven insights.
+It simulates large-scale e-commerce customer behavior and feedback patterns.
+
+---
+
+## 🎯 Objective
+
+- Automatically analyze customer sentiment at scale  
+- Identify product strengths and recurring pain points  
+- Extract meaningful insights from unstructured review text  
+- Support data-driven product and business decisions  
+
+---
+
+## 🧠 Tech Stack
+
+- Python  
+- Pandas  
+- NLTK (VADER Sentiment Analysis)  
+- Scikit-learn (TF-IDF + Logistic Regression)  
+- Streamlit (Interactive Dashboard)  
+- Plotly (Data Visualization)  
+
+---
+
+## 🚀 Key Features
+
+- Real-time sentiment analysis (VADER + ML model comparison)  
+- Interactive business intelligence dashboard  
+- Top complaint and positive keyword extraction  
+- Product and category performance analysis  
+- Review search and filtering system  
+- Recommendation score and engagement metrics  
+
+---
+
+## 📌 Business Impact
+
+This system enables e-commerce businesses to transform raw customer feedback into
+**data-driven business intelligence**.
+
+It helps in:
+
+- Improving product quality based on customer pain points  
+- Identifying features that drive positive customer satisfaction  
+- Monitoring large-scale review trends in real time  
+- Reducing manual effort in analyzing thousands of reviews  
+- Supporting faster and smarter product decisions  
+
+The solution is directly applicable to **e-commerce analytics, customer experience teams, and product management dashboards**, making it suitable for real-world enterprise-level use cases.
+
+---
         """
     )

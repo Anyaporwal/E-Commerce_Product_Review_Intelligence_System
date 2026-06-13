@@ -454,7 +454,7 @@ Compare both predictions side-by-side.
                 if vader_prediction == "Positive":
 
                     st.success(
-                        f" {vader_prediction}"
+                        f"😊 {vader_prediction}"
                     )
 
                 elif vader_prediction == "Negative":
